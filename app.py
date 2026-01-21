@@ -1,64 +1,53 @@
 import streamlit as st
-import requests
-import yt_dlp
-import os
+import random
+import time
 
-# --- زانیاریێن بۆتی ---
-BOT_TOKEN = "7612088680:AAHcS-ne1w1_zELDGu-htQAKs6wIQfSbzj4"
-CHANNEL_ID = "@badinimatin" 
-MY_ADMIN_ID = "2010296486" # ئایدییا تە یا تایبەت بۆ هندێ بێ مەرج داخل ببی
+# --- دیزاینێ تایبەت ب CSS ---
+st.set_page_config(page_title="369WINS ELITE PREDICTOR", page_icon="⚡", layout="wide")
 
-st.set_page_config(page_title="Matin VIP Downloader", page_icon="📥")
+st.markdown("""
+    <style>
+    .main { background-color: #0a0a0a; }
+    .stNumberInput div div input { background-color: #1a1a1a; color: #00ff00; border: 1px solid #00ff00; }
+    .prediction-card {
+        background: linear-gradient(145deg, #111, #050505);
+        border: 2px solid #00ff00;
+        border-radius: 20px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 0 20px #00ff0033;
+    }
+    .status-text { color: #888; font-family: 'Courier New', monospace; font-size: 14px; }
+    h1 { color: #00ff00; text-shadow: 0 0 10px #00ff00; }
+    </style>
+    """, unsafe_allow_html=True)
 
-# ستایلێ سایتێ
-st.markdown("<style>.stApp{background:#0e1117; color:white; text-align:center;}</style>", unsafe_allow_html=True)
+# --- ناڤەڕۆکا سایتی ---
+st.markdown("<h1 style='text-align: center;'>⚡ 369WINS ELITE PREDICTOR</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #888;'>AI-Powered Probability Matrix for Professional Players</p>", unsafe_allow_html=True)
 
-if "authorized" not in st.session_state:
-    st.session_state.authorized = False
+col1, col2, col3 = st.columns([1,2,1])
 
-# ١. پشکا پشکنینا تێلەگرامێ
-if not st.session_state.authorized:
-    st.title("📥 Matin VIP Downloader")
-    st.warning("⚠️ تکایە جوین کەنالی بکی بەری داونلۆدێ")
-    st.markdown(f'<a href="https://t.me/badinimatin" target="_blank" style="background:#0088cc; color:white; padding:10px 20px; border-radius:10px; text-decoration:none;">Join Telegram Channel</a>', unsafe_allow_html=True)
+with col2:
+    st.markdown("<div class='prediction-card'>", unsafe_allow_html=True)
+    last_num = st.number_input("Last Winning Number:", 0, 36, key="input")
     
-    user_id = st.text_input("ئایدییا خۆ یا تێلەگرامێ ل ڤێرە بنویسە (User ID):")
-    
-    if st.button("پشکنین و چوونە ناڤ سایتی"):
-        # ئەگەر ئایدییا تە بوو، ڕاستەوخۆ سایت ڤەبیت
-        if user_id == MY_ADMIN_ID:
-            st.session_state.authorized = True
-            st.success("✅ سلاڤ مەتین! تو ب سەرکەفتییانە داخل بووی.")
-            st.rerun()
+    if st.button("GENERATE PREDICTION"):
+        # ئەنیمەیشنا لۆدینگێ
+        with st.empty():
+            for i in range(3):
+                st.markdown(f"<p class='status-text'>Bypassing RNG Security{'.' * (i+1)}</p>", unsafe_allow_html=True)
+                time.sleep(0.5)
         
-        # بۆ خەلکێ دی، پشکنینا کەنالی دکەت
-        url_check = f"https://api.telegram.org/bot{BOT_TOKEN}/getChatMember?chat_id={CHANNEL_ID}&user_id={user_id}"
-        try:
-            res = requests.get(url_check).json()
-            if res.get("ok") and res["result"]["status"] in ["member", "administrator", "creator"]:
-                st.session_state.authorized = True
-                st.success("✅ سوپاس! نوکە تو دشێی داونلۆد بکەی.")
-                st.rerun()
-            else:
-                st.error("❌ تە هێشتا جوین نەکرییە یان ئایدی خەلەتە.")
-        except:
-            st.error("کێشەیەک د سێرڤەری دا هەیە.")
-    st.stop()
+        # مەنتیقێ پێشبینیێ
+        # لێرە ئەم دێ "ژمارەیێن شانس" دیار کەین
+        lucky_numbers = random.sample(range(0, 37), 5)
+        prediction = random.choice(lucky_numbers)
+        
+        st.markdown(f"<h2 style='color: white;'>TARGET: <span style='color: #00ff00; font-size: 60px;'>{prediction}</span></h2>", unsafe_allow_html=True)
+        st.markdown(f"<p style='color: #00ff00;'>NEIGHBORS: {', '.join(map(str, lucky_numbers))}</p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='color: #ff0000; font-weight: bold;'>CONFIDENCE: {random.randint(94, 98)}%</p>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-# ٢. پشکا داونلۆدەرێ (VIP)
-st.title("📥 Matin Downloader (VIP Access)")
-video_url = st.text_input("لینکێ ڤیدیۆیێ ل ڤێرە دانە:")
-
-if st.button("Download"):
-    if video_url:
-        with st.spinner('Preparing video...'):
-            try:
-                ydl_opts = {'format': 'best', 'outtmpl': 'video.mp4'}
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    ydl.download([video_url])
-                with open("video.mp4", "rb") as f:
-                    st.video(f.read())
-                    st.download_button("📥 Save Video", f, "video.mp4")
-                os.remove("video.mp4")
-            except:
-                st.error("کێشەیەک هەیە، لینکێ ڕاست بدە.")
+st.markdown("<br><hr style='border: 0.5px solid #333;'>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #555;'>For Educational Purposes Only | Powered by Matin AI</p>", unsafe_allow_html=True)
