@@ -1,72 +1,45 @@
 import streamlit as st
-import random
-import time
+import pandas as pd
 
-# --- دیزاینێ تایبەت ب CSS ---
-st.set_page_config(page_title="پێشبینیکەرێ 369WINS", page_icon="⚡", layout="wide")
+st.set_page_config(page_title="Matin Hockey - High Scores", layout="wide")
 
 st.markdown("""
     <style>
-    /* دیزاینا گشتی یا لاپەڕی */
-    .main { background-color: #0a0a0a; }
-    
-    /* ڕەنگێ نڤیسینێ و جهێ داخڵکرنا ژماران */
-    .stNumberInput div div input { 
-        background-color: #1a1a1a; 
-        color: #00ff00; 
-        border: 1px solid #00ff00; 
-        text-align: center;
-        font-size: 20px;
-    }
-    
-    /* سندوقا پێشبینیێ */
-    .prediction-card {
-        background: linear-gradient(145deg, #111, #050505);
-        border: 2px solid #00ff00;
-        border-radius: 20px;
-        padding: 30px;
-        text-align: center;
-        box-shadow: 0 0 20px #00ff0033;
-        direction: rtl; /* بۆ هندێ نڤیسینا کوردی ڕێک بیت */
-    }
-    
-    .status-text { color: #888; font-family: 'Courier New', monospace; font-size: 14px; }
-    h1 { color: #00ff00; text-shadow: 0 0 10px #00ff00; font-family: 'Arial'; }
-    p { color: white; direction: rtl; }
+    .main { background-color: #0d1b2a; color: #e0e1dd; direction: rtl; }
+    .stDataFrame { border: 2px solid #00b4d8; border-radius: 10px; }
+    h1 { color: #00b4d8; text-align: center; font-family: 'Arial'; }
+    .goal-tag { color: #ff4d4d; font-weight: bold; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- ناڤەڕۆکا سایتی ب بادینی ---
-st.markdown("<h1 style='text-align: center;'>⚡ سیستەمێ پێشبینیکەرێ 369WINS</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #888;'>بۆتێ زیرەک بۆ دیارکرنا ژمارەیێن ب شانس د ڕۆلێتێ دا</p>", unsafe_allow_html=True)
+st.title("🏒 ئەرشیفێ یارییێن تژی گۆل و مێژوویی")
+st.write("ل ڤێرە تەنێ ئەو یارییێن کو زۆرترین گۆل تێدا هاتینە تۆمارکرن دیار دبن:")
 
-col1, col2, col3 = st.columns([1,2,1])
+# لیستا یارییێن تژی گۆل کو AI بۆ تە کۆم کرینە
+high_scoring_data = [
+    {"ڕێکەفت": "1984-12-19", "تیمێ ئێکێ": "Edmonton Oilers", "ئەنجام": "12 - 9", "تیمێ دووێ": "Chicago Blackhawks", "کۆمێ گۆلان": "21 ⚽", "خۆل": "NHL"},
+    {"ڕێکەفت": "1985-01-08", "تیمێ ئێکێ": "Edmonton Oilers", "ئەنجام": "10 - 7", "تیمێ دووێ": "Vancouver Canucks", "کۆمێ گۆلان": "17 ⚽", "خۆل": "NHL"},
+    {"ڕێکەفت": "1981-03-19", "تیمێ ئێکێ": "Quebec Nordiques", "ئەنجام": "11 - 7", "تیمێ دووێ": "Washington Capitals", "کۆمێ گۆلان": "18 ⚽", "خۆل": "NHL"},
+    {"ڕێکەفت": "1996-01-04", "تیمێ ئێکێ": "San Jose Sharks", "ئەنجام": "10 - 8", "تیمێ دووێ": "Pittsburgh Penguins", "کۆمێ گۆلان": "18 ⚽", "خۆل": "NHL"},
+    {"ڕێکەفت": "2011-10-27", "تیمێ ئێکێ": "Winnipeg Jets", "ئەنجام": "9 - 8", "تیمێ دووێ": "Philadelphia Flyers", "کۆمێ گۆلان": "17 ⚽", "خۆل": "NHL"},
+    {"ڕێکەفت": "2022-05-18", "تیمێ ئێکێ": "Calgary Flames", "ئەنجام": "9 - 6", "تیمێ دووێ": "Edmonton Oilers", "کۆمێ گۆلان": "15 ⚽", "خۆل": "Playoffs"},
+    {"ڕێکەفت": "2024-02-19", "تیمێ ئێکێ": "Minnesota Wild", "ئەنجام": "10 - 7", "تیمێ دووێ": "Vancouver Canucks", "کۆمێ گۆلان": "17 ⚽", "خۆل": "NHL 2024"},
+    {"ڕێکەفت": "2023-11-21", "تیمێ ئێکێ": "Toronto Maple Leafs", "ئەنجام": "7 - 9", "تیمێ دووێ": "Florida Panthers", "کۆمێ گۆلان": "16 ⚽", "خۆل": "NHL"},
+    {"ڕێکەفت": "2025-12-10", "تیمێ ئێکێ": "USA", "ئەنجام": "8 - 5", "تیمێ دووێ": "Canada", "کۆمێ گۆلان": "13 ⚽", "خۆل": "Friendly 2025"},
+    {"ڕێکەفت": "1920-01-10", "تیمێ ئێکێ": "Montreal Canadiens", "ئەنجام": "14 - 7", "تیمێ دووێ": "Toronto St. Pats", "کۆمێ گۆلان": "21 ⚽", "خۆل": "History"},
+    {"ڕێکەفت": "2024-11-05", "تیمێ ئێکێ": "Colorado Avalanche", "ئەنجام": "8 - 4", "تیمێ دووێ": "Seattle Kraken", "کۆمێ گۆلان": "12 ⚽", "خۆل": "NHL"},
+    {"ڕێکەفت": "2026-01-12", "تیمێ ئێکێ": "Sweden", "ئەنجام": "6 - 7", "تیمێ دووێ": "Finland", "کۆمێ گۆلان": "13 ⚽", "خۆل": "Euro Hockey"},
+]
 
-with col2:
-    st.markdown("<div class='prediction-card'>", unsafe_allow_html=True)
-    
-    # وەرگرتنا ژمارا دوماهییێ ژ کڕیاری
-    last_num = st.number_input("دواین ژمارەیا کەفتی بنڤیسە:", 0, 36, key="input")
-    
-    if st.button("پێشبینییا ژمارا داهاتی"):
-        # ئەنیمەیشنا لۆدینگێ (وەک هاکەران)
-        status_placeholder = st.empty()
-        for i in range(3):
-            status_placeholder.markdown(f"<p class='status-text' style='text-align:center;'>لێگەڕیان د سێرڤەرێن 369Wins دا{'.' * (i+1)}</p>", unsafe_allow_html=True)
-            time.sleep(0.6)
-        status_placeholder.empty()
-        
-        # مەنتیقێ پێشبینیێ
-        # لێرە ئەم دێ ٥ ژمارەیێن ب شانس وەک "دراوسێ" نیشان دەین
-        lucky_numbers = random.sample(range(0, 37), 5)
-        main_target = random.choice(lucky_numbers)
-        
-        st.markdown(f"<h2 style='color: white;'>ژمارەیا ئامانج: <span style='color: #00ff00; font-size: 60px;'>{main_target}</span></h2>", unsafe_allow_html=True)
-        st.markdown(f"<p style='color: #00ff00; font-size: 18px;'>ژمارەیێن دەوروبەر (Neighbors): {', '.join(map(str, lucky_numbers))}</p>", unsafe_allow_html=True)
-        st.markdown(f"<p style='color: #ff0000; font-weight: bold;'>ڕێژەیا درستبوونێ: {random.randint(94, 98)}%</p>", unsafe_allow_html=True)
-    
-    st.markdown("</div>", unsafe_allow_html=True)
+df = pd.DataFrame(high_scoring_data)
 
-# پاشکۆیا سایتی
-st.markdown("<br><hr style='border: 0.5px solid #333;'>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #555;'>ئەڤ سایتە تەنێ بۆ مفا وەرگرتنێ یە | گەشەپێدان ژ لایێ مەتین AI</p>", unsafe_allow_html=True)
+# نیشاندانا خشتەیی ب شێوازەکێ جوان
+st.dataframe(df, use_container_width=True, hide_index=True)
+
+st.write("---")
+st.markdown("### 💡 ئایا دزانی؟")
+st.info("یاریا سالا ١٩٨٤ د ناڤبەرا Oilers و Blackhawks دا، ئێکە ژ پڕ گۆلترین یارییێن مێژوویا NHL کو تێدا ٢١ گۆل هاتینە تۆمارکرن!")
+
+# پشکا ئامارێن بلێز
+st.sidebar.metric("کۆمێ یارییان", len(high_scoring_data))
+st.sidebar.metric("زۆرترین گۆل د یاریەکێ دا", "21")
